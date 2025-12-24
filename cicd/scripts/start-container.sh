@@ -6,8 +6,10 @@ AWS_ACCOUNT_ID=785186659004
 ECR_REPO=frontend
 CONTAINER_NAME=frontend
 
-# Read image URI from ECS image definition (artifact root)
-IMAGE_URI=$(jq -r '.[0].imageUri' imagedef-frontend.json)
+# Extract build number from CodeDeploy deployment instructions
+IMAGE_TAG=$(cat /opt/codedeploy-agent/deployment-root/deployment-instructions/* | grep -o '[0-9]\+' | head -1)
+
+IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
 
 echo "Starting frontend container with image: $IMAGE_URI"
 
