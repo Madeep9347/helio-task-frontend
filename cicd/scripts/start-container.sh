@@ -2,14 +2,12 @@
 set -e
 
 AWS_REGION=ap-south-1
-AWS_ACCOUNT_ID=785186659004   # <-- your account ID
+AWS_ACCOUNT_ID=785186659004
 ECR_REPO=frontend
 CONTAINER_NAME=frontend
 
-# Extract build number from CodeDeploy instructions
-IMAGE_TAG=$(grep -o '[0-9]\+' /opt/codedeploy-agent/deployment-root/deployment-instructions/* | head -1)
-
-IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+# Read image URI from ECS image definition (artifact root)
+IMAGE_URI=$(jq -r '.[0].imageUri' imagedef-frontend.json)
 
 echo "Starting frontend container with image: $IMAGE_URI"
 
