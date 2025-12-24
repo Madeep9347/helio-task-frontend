@@ -29,5 +29,5 @@ docker pull $IMAGE_URI
 
 docker run -d \
   --name $CONTAINER_NAME \
-  -p 5000:5000 \
+  -p 80:80 \
   $IMAGE_URI
