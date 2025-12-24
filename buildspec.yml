@@ -8,25 +8,23 @@ env:
 phases:
   pre_build:
     commands:
-      - echo "Logging in to Amazon ECR..."
+      - echo Logging in to Amazon ECR...
       - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
       - IMAGE_TAG=$CODEBUILD_BUILD_NUMBER
-      - echo "Using image tag: $IMAGE_TAG"
+      - echo Using image tag $IMAGE_TAG
 
   build:
     commands:
-      - echo "Building frontend Docker image..."
+      - echo Building frontend Docker image...
       - docker build -t $ECR_REPO:$IMAGE_TAG ecommerce-frontend
       - docker tag $ECR_REPO:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
 
   post_build:
     commands:
-      - echo "Pushing frontend image to ECR..."
+      - echo Pushing frontend image to ECR...
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-
-      # Save the image tag for CodeDeploy (CRITICAL)
-      - echo "IMAGE_TAG=$IMAGE_TAG" > image.env
+      - echo IMAGE_TAG=$IMAGE_TAG > image.env
       - cat image.env
 
 artifacts:
