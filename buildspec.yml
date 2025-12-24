@@ -26,9 +26,12 @@ phases:
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
       - echo IMAGE_TAG=$IMAGE_TAG > image.env
       - cat image.env
+      - printf '[{"name":"frontend","imageUri":"%s"}]' "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG" > imagedefinitions.json
+      - cat imagedefinitions.json
 
 artifacts:
   files:
     - appspec.yml
     - cicd/scripts/**/*
     - image.env
+    - imagedefinitions.json
