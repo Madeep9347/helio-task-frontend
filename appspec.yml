@@ -1,0 +1,18 @@
+version: 0.0
+os: linux
+
+hooks:
+  ApplicationStop:
+    - location: cicd/scripts/stop-container.sh
+      timeout: 300
+      runas: root
+
+  BeforeInstall:
+    - location: cicd/scripts/stop-container.sh
+      timeout: 300
+      runas: root
+
+  ApplicationStart:
+    - location: cicd/scripts/start-container.sh
+      timeout: 300
+      runas: root

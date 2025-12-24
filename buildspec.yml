@@ -1,0 +1,36 @@
+version: 0.2
+
+env:
+  variables:
+    AWS_REGION: ap-south-1
+    ECR_REPO: frontend
+
+phases:
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - IMAGE_TAG=$CODEBUILD_BUILD_NUMBER
+      - echo "Image tag: $IMAGE_TAG"
+
+  build:
+    commands:
+      - echo "Building frontend Docker image..."
+      - docker build -t $ECR_REPO:$IMAGE_TAG ecommerce-frontend
+      - docker tag $ECR_REPO:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+
+  post_build:
+    commands:
+      - echo "Pushing frontend image to ECR..."
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+      - IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
+      - echo "Creating imagedef-frontend.json"
+      - printf '[{"name":"frontend","imageUri":"%s"}]' "$IMAGE_URI" > imagedef-frontend.json
+      - cat imagedef-frontend.json
+
+artifacts:
+  files:
+    - appspec.yml
+    - cicd/scripts/**/*
+    - imagedef-frontend.json
