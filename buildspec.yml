@@ -12,7 +12,6 @@ phases:
       - AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
       - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
       - IMAGE_TAG=$CODEBUILD_BUILD_NUMBER
-      - echo "Image tag: $IMAGE_TAG"
 
   build:
     commands:
@@ -22,10 +21,10 @@ phases:
 
   post_build:
     commands:
-      - echo "Pushing frontend image to ECR..."
+      - echo "Pushing frontend image..."
       - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
       - IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:$IMAGE_TAG
-      - echo "Creating imagedef-frontend.json"
+      - echo "Creating imagedef-frontend.json with $IMAGE_URI"
       - printf '[{"name":"frontend","imageUri":"%s"}]' "$IMAGE_URI" > imagedef-frontend.json
       - cat imagedef-frontend.json
 
